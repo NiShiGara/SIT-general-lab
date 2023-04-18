@@ -5,223 +5,79 @@
     <title>Афиша мероприятий</title>
     {% import "macros.html" as macros %}
 </head>
+
 <body>
-<div class=menu>
-    <ul>
-        <li class=active><a href={{ url_for("event")}}>Афиша</a></li>
-        <form action={{url_for('event')}} method="get">
-            <input type="submit" name="user_logout" value="Выйти"
-                   style="background:#fc6c85;  color: #fff0f5; height:100%; border: none;">
-        </form>
-    </ul>
-</div>
-
-
-<div class=box_for_all_profile>
-    {% if len(status_list) != 0 %}
-    <h1 style="">Мероприятия на которые вы зарегистрировались</h1>
-    {%else%}
-    <h1 style="">Вы еще не зарегистрировались ни на одно мероприятие.</h1>
-    {%endif%}
-    {% if len(status_list) != 0 %}
-    <div class="box_for_all_profile_wt_text">
-        <div class=add_menu_user>
-            <form action="" method="post">
-                {{macros.render_table("Статус мероприятия",status_list,session['status_user'],len)}}
-                <input type="submit" value="Найти" name="search"
-                       style="background:#fc6c85;  color: #fff0f5; margin-top:3%; margin-left:15%;">
-                <input type="submit" value="Очистить" name="clear"
-                       style="background:#fc6c85;  color: #fff0f5; margin-top:3%; margin-left:10%;">
-                <br><br>
+    <div class=menu>
+        <ul>
+            <li class=active><a href="{{ url_for("event") }}">Афиша</a></li>
+            <li class=active><a href="{{ url_for("suggest_event") }}">Предложить мероприятие</a></li>
+            <form action="{{ url_for('event') }}" method="get">
+                <input type="submit" name="user_logout" value="Выйти" class="btn-log">
             </form>
-        </div>
+        </ul>
+    </div>
+
+    {{ macros.render_sort(title, 'profile') }}
+
+    <div class=box_for_all>
+        {% if len(status_list) != 0 %}
+            <div class="add_menu">
+                <form action="" method="post">
+                    {{ macros.render_table("Статус мероприятия", status_list, session['status_user'], len) }}
+                    <input type="submit" value="Найти" name="search" class="btn filter">
+                    <input type="submit" value="Очистить" name="clear" class="btn filter">
+                </form>
+            </div>
+            <form action="" method="get">
+                <div class="title">
+                    {% if len(status_list) != 0 %}
+                        Мероприятия, на которые вы зарегистрировались
+                    {% else %}
+                        Вы еще не зарегистрировались ни на одно мероприятие
+                    {% endif %}
+                </div>
+
+                <div class="all_events_box">
+                    {{ macros.render_event_list(events, "profile", participants_list, user_role, user_event_list, len, list_title) }}
+                </div>
+            </form>
         {% endif %}
+    </div>
 
+    {{ macros.event_info(event_info, participants_list, "profile", list_title, len) }}
+
+    {% if rate_window == True %}
+    <form action="" method="get">
+        <div class="cl-btn-7" name="close_button"></div>
+        <div class="close_button3">
+            <input type="submit" value="">
+        </div>
+    </form>
+
+    <div class="rate">
         <form action="" method="get">
-            <div class="all_events_box">
-                <br>
-                {% for i in range(len(events)) %}
-                <div class="container_box_one_event">
-                    {%if events['status_id'].values[i] == 2%}
-                    <p3 style="color:#c8385a;">
-                        Внимание! Мероприятие было перенесено на {{events['beginning_date'].values[i]}}!
-                    </p3>
-                    <br>
-                    {%endif%}
-                    {%if events['status_id'].values[i] == 3%}
-                    <p3 style="color:#c8385a;">
-                        Внимание! Мероприятие было отменено!
-                    </p3>
-                    <br>
-                    {%endif%}
-                    {%if events['status_id'].values[i] == 4%}
-                    <p3 style="color:#c8385a;">
-                        Мероприятие завершено.
-                    </p3>
-                    <br>
-                    {%endif%}
-                    <br>Название:
-                    <p3>{{ events['event_name'].values[i]}}</p3>
-                    <br>
-                    <br>Тип:
-                    <p3>{{ events['type_name'].values[i]}}</p3>
-                    <br>
-                    <br>Тема:
-                    <p3>{{ events['theme_name'].values[i]}}</p3>
-                    <br>
-                    <br>Количество участников:
-                    <p3>{{ events['participants'].values[i]}}</p3>
-                    <br>
-                    <br>Дата:
-                    <p3>{{ events['beginning_date'].values[i]}}</p3>
-                    <br>
-                    <br>Время:
-                    <p3>{{ events['start_time'].values[i]}}</p3>
-                    <br>
-                    <br>Место проведения:
-                    <p3>{{ events['location_name'].values[i]}}</p3>
-                    <br>
-                    <br>Статус:
-                    {% if (events['status_id'].values[i] == 3) or (events['status_id'].values[i] == 4) %}
-                    <p3 style="color:#a52a2a;">{{ events['status_name'].values[i]}}</p3>
-                    {% else %}
-                    {% if events['status_id'].values[i] == 1%}
-                    <p3 style="color:#47a76a;">{{ events['status_name'].values[i]}}</p3>
-                    {% else %}
-                    <p3 style="color:#a98307;">{{ events['status_name'].values[i]}}</p3>
-                    {% endif %}
-                    {% endif %}
-                    <br><br>
-                    {% if (events['status_id'].values[i] == 1) or (events['status_id'].values[i] == 2) %}
-                    <div class="buttons">
-                        <form action='' method="get">
-                            <input type="hidden" name="cancel" value={{ events['event_id'].values[i] }}>
-                            <input type="submit" value="Отменить участие"
-                                   style="position: absolute; left: 2%;bottom: 2%;background:#c8385a;  color: #fff0f5;">
-                        </form>
-                        {% else %}
-                        {% if (events['status_id'].values[i] == 3)%}
-                        <div class="buttons">
-                            <form action='' method="get">
-                                <input type="hidden" name="cancel" value={{ events['event_id'].values[i] }}>
-                                <input type="submit" value="Удалить из списка"
-                                       style="position: absolute; left: 2%;bottom: 2%; background:#c8385a;  color: #fff0f5;">
-                            </form>
-                            {% else %}
-                            <div class="buttons">
-                                <form action='' method="get">
-                                    <input type="hidden" name="to_rate" value={{ events['event_id'].values[i] }}>
-                                    <input type="submit" value="Оценить мероприятие"
-                                           style="position: absolute; left: 2%;bottom: 2%; background:#d6a609;  color: #fff0f5;">
-                                </form>
-                                {% endif %}
-                                {% endif %}
-                                <form action='' method="get">
-                                    <input type="hidden" name="choice_event" value={{ events['event_id'].values[i] }}>
-                                    <input type="submit" value="Подробнее"
-                                           style="position: absolute; right: 2%;bottom: 2%; background:#fc6c85;  color: #fff0f5;">
-                                </form>
-                            </div>
+            <div class="title title-2">
+                Оставьте обратную связь и оцените мероприятие
+            </div>
+            <label>
+                <select name="rate_box" class="select-list">
+                    <option>Всё очень понравилось</option>
+                    <option>Всё было хорошо</option>
+                    <option>Были недостатки</option>
+                    <option>Совершенно не понравилось</option>
+                </select>
+            </label>
 
-                        </div>
-                        {% endfor %}
-                    </div>
-
+            <label>
+                <textarea name="rate_text" class="rate_text" placeholder="Оцените мероприятие..."></textarea>
+            </label>
+            <input type="submit" value="Отправить" name="to_rate_event" class="btn send">
         </form>
     </div>
-</div>
-
-
-{% if info_ == 1 %}
-<div class="info_about_event_gray">
-</div>
-<form action="" method="get">
-    <div class="cl-btn-7" name="close_button"></div>
-    <div class="close_button">
-        <input type="submit" value=" ">
-    </div>
-</form>
-<div class="info_about_event">
-    <br>Название:
-    <p4>{{ event_info['event_name'].values[0]}}</p4>
-    <br>
-    <br>Тип:
-    <p4>{{ event_info['type_name'].values[0]}}</p4>
-    <br>
-    <br>Тема:
-    <p4>{{ event_info['theme_name'].values[0]}}</p4>
-    <br>
-    <br>Организатор:
-    <p4>{{ event_info['organizer_name'].values[0]}}</p4>
-    <br>
-    <br>Количество участников:
-    <p4>{{ event_info['participants'].values[0]}}</p4>
-    <br>
-    <br>Количество зарегистрировавшихся на мероприятие:
-    {% if len(participants_list[participants_list['event_id'] ==
-    event_info['event_id'].values[0]]['coun']) != 0%}
-
-    <p4>{{participants_list[participants_list['event_id'] ==
-        event_info['event_id'].values[0]]['coun'].values[0]}}
-    </p4>
-    {%else%}
-    0
-    {%endif%}
-    <br>
-    {% if event_info['beginning_dat'].values[0] == event_info['expiration_dat'].values[0] %}
-    <br>Дата мероприятия:
-    <p4>{{ event_info['beginning_dat'].values[0]}}</p4>
-    {% else %}
-    <p4>{{ event_info['beginning_dat'].values[0]}} - event_info['expiration_dat'].values[0]</p4>
     {% endif %}
-    <br>
-    <br>Время:
-    <p4>{{ event_info['start_time'].values[0]}} - {{ event_info['end_time'].values[0]}}</p4>
-    <br>
-    <br>Площадка:
-    <p4>{{ event_info['location_name'].values[0]}}</p4>
-    <br>
-    <br>Место проведения:
-    <p4>{{ event_info['venue_name'].values[0]}}</p4>
-    <br>
-    <br>Статус:
-    <p4>{{ event_info['status_name'].values[0]}}</p4>
-    <br><br><br><br>
-    <br>Описание:<br>
-    <p4>{{ event_info['description'].values[0]}}</p4>
-    <br>
 
-</div>
-{% endif %}
-
-
-{% if rate_window == True %}
-<div class="rate_gray">
-</div>
-<form action="" method="get">
-    <div class="cl-btn-7" name="close_button"></div>
-    <div class="close_button3">
-        <input type="submit" value=" ">
-    </div>
-</form>
-<div class="rate">
-    <form action="" method="get">
-        <p5 style="font-size:22px;">Оставьте обратную связь и оцените мероприятие</p5>
-        <br>
-        <select style="margin-top:5%;" name="rate_box">
-            <option>Всё очень понравилось</option>
-            <option>Всё было хорошо</option>
-            <option>Были недостатки</option>
-            <option>Совершенно не понравилось</option>
-        </select>
-        <textarea name="rate_text" placeholder="Оцените мероприятие..."
-                  style=" height:30vh;width:100%; margin-top:10%; "></textarea>
-
-        <input type="submit" value="Отправить" name="to_rate_event"
-               style="width:20%; height:10%; margin-left:40%; margin-top:10%;margin-bottom:5%;">
+    <form action="{{url_for('event')}}" method="get">
+        <input type="submit" name="remove_profile_button" value="Удалить аккаунт" class="btn">
     </form>
-</div>
-{% endif %}
-
 </body>
 </html>

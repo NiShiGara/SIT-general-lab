@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <title>Афиша мероприятий</title>
+    {% import "macros.html" as macros %}
+</head>
+
+<body>
+<div>
+    <div class=menu>
+        <ul>
+            <li class=active><a href="{{ url_for("event") }}">Афиша</a></li>
+            <li class=active><a href="{{ url_for("profile") }}">Личный кабинет</a></li>
+        </ul>
+    </div>
+
+    <div class="suggest_panel">
+        <div class="admin_panel_right_data">
+            {{ macros.admin_panel_add(theme_list, type_list, organizer_list, location_list, status_list, len, "suggest") }}
+        </div>
+    </div>
+</div>
+</body>
+</html>

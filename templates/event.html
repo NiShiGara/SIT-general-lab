@@ -6,252 +6,139 @@
     {% import "macros.html" as macros %}
 </head>
 <body>
-<div class=menu>
-    <ul>
-        <li class=active>Афиша</a></li>
-        {% if user_session == False %}
+    <div class=menu>
+        <ul>
+            <li class=active>Афиша</li>
+            {% if user_role == "guest" %}
+                <form action="{{ url_for('event') }}#open_user" method="get">
+                    <input type="submit" name="user_login" value="Войти" class="btn-log">
+                </form>
+            {% elif user_role == "user" %}
+                <li class=active><a href="{{ url_for("profile") }}">Личный кабинет</a></li>
+            {% elif user_role == "admin" %}
+                <li class=active><a href="{{ url_for("admin_profile") }}">Личный кабинет</a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    {{ macros.render_sort(title, 'event') }}
+
+    <div class=box_for_all>
+        <div class=add_menu>
+            <form action="" method="post">
+
+                {{ macros.render_table("Тип", type_list,session['types'], len) }}
+                {{ macros.render_table("Тема", theme_list,session['themes'], len) }}
+                {{ macros.render_table("Организатор", organizer_list,session['organizers'], len) }}
+
+                <fieldset>
+                    <legend><strong>Дата</strong></legend>
+                    <p class="left_filter">С
+                        {% if session['start_date'] == "0000-00-00" %}
+                            <label>
+                                <input type="text" name="start_date">
+                            </label>
+                        {% else %}
+                            <label>
+                                <input type="text" name="start_date"
+                                       value="{{ session['start_date'][8:11] + '.' + session['start_date'][5:7]+ '.' + session['start_date'][0:4] }}">
+                            </label>
+                        {% endif %}
+                    </p>
+
+                    <p class="left_filter">По
+                        {% if session['end_date'] == "9999-99-99" %}
+                            <label>
+                                <input type="text" name="end_date">
+                            </label>
+                        {% else %}
+                            <label>
+                                <input type="text" name="end_date"
+                                       value="{{ session['end_date'][8:11] + '.' + session['end_date'][5:7]+ '.' + session['end_date'][0:4] }}">
+                            </label>
+                        {% endif %}
+                    </p>
+                </fieldset>
+
+                <fieldset>
+                    <legend><strong>Время</strong></legend>
+                    <p class="left_filter">С
+                        {% if session['start_time'] == "00:00" %}
+                            <label>
+                                <input type="text" name="start_time">
+                            </label>
+                        {% else %}
+                            <label>
+                                <input type="text" name="start_time" value="{{ session['start_time'] }}">
+                            </label>
+                        {% endif %}
+                    </p>
+
+                    <p class="left_filter">По
+                        {% if session['end_time'] == "23:59" %}
+                            <label>
+                                <input type="text" name="end_time">
+                            </label>
+
+                        {% else %}
+                            <label>
+                                <input type="text" name="end_time" value="{{ session['end_time'] }}">
+                            </label>
+
+                        {% endif %}
+                    </p>
+                </fieldset>
+
+                {{ macros.render_table("Площадка",location_list,session['locations'],len) }}
+                {{ macros.render_table("Статус",status_list,session['status'],len) }}
+                <input type="submit" value="Найти" name="search" class="btn filter">
+                <input type="submit" value="Очистить" name="clear" class="btn filter">
+            </form>
+        </div>
+
         <form action="" method="get">
-            <input type="submit" name="user_login" value="Войти"
-                   style="background:#fc6c85;  color: #fff0f5; height:100%; border: none;">
-        </form>
-        {% else %}
-
-        <li class=active><a href={{ url_for("profile")}}>Личный кабинет</a></li>
-
-        {% endif %}
-    </ul>
-</div>
-<div class=box_for_all>
-    <div class=add_menu>
-        <form action="" method="post">
-            {{macros.render_table("Тип",type_list,session['types'],len)}}
-            {{macros.render_table("Тема",theme_list,session['themes'],len)}}
-            {{macros.render_table("Организатор",organizer_list,session['organizers'],len)}}
-
-            <fieldset>
-                <legend><strong>Дата</strong></legend>
-                С
-                {%if session['start_date'] == "0000-00-00"%}
-                <input type="text" name="start_date"><br><br>
-                {%else%}
-                <input type="text" name="start_date" value="{{ session['start_date'][8:11] + '.' + session['start_date'][5:7]+ '.' + session['start_date'][0:4]}}"><br><br>
-                {%endif%}
-                По
-                {%if session['end_date'] == "9999-99-99"%}
-                <input type="text" name="end_date"><br><br>
-                {%else%}
-                <input type="text" name="end_date" value="{{ session['end_date'][8:11] + '.' + session['end_date'][5:7]+ '.' + session['end_date'][0:4]}}"><br><br>
-                {%endif%}
-            </fieldset>
-
-            <fieldset>
-                <legend><strong>Время</strong></legend>
-                С
-                {%if session['start_time'] == "00:00"%}
-                <input type="text" name="start_time"><br><br>
-                {%else%}
-                <input type="text" name="start_time" value="{{session['start_time']}}"><br><br>
-                {%endif%}
-                По
-                {%if session['end_time'] == "23:59"%}
-                <input type="text" name="end_time"><br><br>
-                {%else%}
-                <input type="text" name="end_time" value="{{session['end_time']}}"><br><br>
-                {%endif%}
-            </fieldset>
-
-            {{macros.render_table("Площадка",location_list,session['locations'],len)}}
-            {{macros.render_table("Статус",status_list,session['status'],len)}}
-            <input type="submit" value="Найти" name="search"
-                   style="background:#fc6c85;  color: #fff0f5; margin-top:10%; margin-left:15%;">
-            <input type="submit" value="Очистить" name="clear"
-                   style="background:#fc6c85;  color: #fff0f5; margin-top:10%; margin-left:10%;">
-            <br><br>
+            <div class="all_events_box">
+                <div class="info">
+                    <div class="title title-2">Найдены мероприятия в количестве:
+                    {% if len(events.index) == 0 %}
+                        ничего не найдено.
+                    {% else %}
+                        {{ len(events.index) }}. Из них актуально: {{ len(events[events['status_name'] == 'Актуально']) }}.
+                    {% endif %}
+                    </div>
+                </div>
+            {{ macros.render_event_list(events, "event", participants_list, user_role, user_event_list, len, list_title) }}
+            </div>
         </form>
     </div>
 
-    <form action="" method="get">
-        <div class="all_events_box">
-            <br>
-            {% for i in range(len(events)) %}
-            <div class="container_box_one_event">
-                {%if events['status_id'].values[i] == 2%}
-                <p3 style="color:#c8385a;">
-                    Внимание! Мероприятие было перенесено на {{ events['beginning_date'].values[i][8:11] + '.' + events['beginning_date'].values[i][5:7]+ '.' + events['beginning_date'].values[i][0:4]}}!
-                </p3>
-                <br>
-                {%endif%}
-                {%if events['status_id'].values[i] == 3%}
-                <p3 style="color:#c8385a;">
-                    Внимание! Мероприятие было отменено!
-                </p3>
-                <br>
-                {%endif%}
-                {%if events['status_id'].values[i] == 4%}
-                <p3 style="color:#c8385a;">
-                    Мероприятие завершено.
-                </p3>
-                <br>
-                {%endif%}
+    {{ macros.event_info(event_info, participants_list, "event", list_title, len) }}
 
-                <br>Название:
-                <p3>{{ events['event_name'].values[i]}}</p3>
-                <br>
-                <br>Тип:
-                <p3>{{ events['type_name'].values[i]}}</p3>
-                <br>
-                <br>Тема:
-                <p3>{{ events['theme_name'].values[i]}}</p3>
-                <br>
-                <br>Количество участников:
-                <p3>{{ events['participants'].values[i]}}</p3>
-                <br>
-                <br>Дата:
-                <p3>{{ events['beginning_dat'].values[i]}}</p3>
-                <br>
-                <br>Время:
-                <p3>{{ events['start_time'].values[i]}}</p3>
-                <br>
-                <br>Место проведения:
-                <p3>{{ events['location_name'].values[i]}}</p3>
-                <br>
-                <br>Статус:
-                {% if (events['status_id'].values[i] == 3) or (events['status_id'].values[i] == 4) %}
-                <p3 style="color:#a52a2a;">{{ events['status_name'].values[i]}}</p3>
-                {% else %}
-                {% if events['status_id'].values[i] == 1%}
-                <p3 style="color:#47a76a;">{{ events['status_name'].values[i]}}</p3>
-                {% else %}
-                <p3 style="color:#a98307;">{{ events['status_name'].values[i]}}</p3>
-                {% endif %}
-                {% endif %}
-                <br><br>
-
-                <div class="buttons">
-                    {% if (events['event_id'].values[i] in user_event_list) and (events['status_id'].values[i] == 1) %}
-                    <form action='' method="get">
-                        <input type="hidden" name="cancel" value={{ events['event_id'].values[i] }}>
-                        <input type="submit" value="Отменить участие"
-                               style="position: absolute; left: 2%;bottom: 2%; background:#c8385a;  color: #fff0f5;">
-                    </form>
-                    {% else %}
-
-                    {% if (events['status_id'].values[i] == 3) or (events['status_id'].values[i] == 4) %}
-                    <input type="submit" disabled value="Участвовать"
-                           style="position: absolute; left: 2%;bottom: 2%; background:#ddbec3;  color: #fff0f5;">
-                    {% else %}
-                    {%set parti = participants_list[participants_list['event_id'] ==
-                    events['event_id'].values[i]]['coun'].values[0]%}
-                    {% if parti == null or events['participants'].values[i] != parti %}
-                    <form action='' method="get">
-                        <input type="hidden" name="registration" value={{ events['event_id'].values[i] }}>
-                        <input type="submit" value="Участвовать"
-                               style="position: absolute; left: 2%;bottom: 2%;background:#fc6c85;  color: #fff0f5;">
-                    </form>
-                    {%else%}
-                    <input type="submit" disabled value="Участвовать"
-                           style=" position: absolute; left: 2%;bottom: 2%;color: #fff0f5; background:#ddbec3;">
-                    {% endif %}
-                    {% endif %}
-                    {% endif %}
-                    <form action='' method="get">
-                        <input type="hidden" name="choice_event" value={{ events['event_id'].values[i] }}>
-                        <input type="submit" value="Подробнее"
-                               style="position: absolute; right: 2%;bottom: 2%; background:#fc6c85;  color: #fff0f5;">
+    {% if type_auth != '' %}
+    <div id="open_user" class="info_about_event">
+        <div class="modal_auth-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form action="" method="get">
+                        <a href="#close_info" title="Close" class="close">×</a>
+                        <div class="auth">
+                            <label>
+                               Логин: <input type="text" name="login" class="input_auth">
+                            </label>
+                            <label>
+                                Пароль: <input type="text" name="password" class="input_auth">
+                            </label>
+                            <input type="submit" name="type_auth" value="{{ type_auth }}" class="btn filter">
+                            <input type="submit" name="reg" value="{{ reg }}" class="btn filter">
+                            <label class="error">
+                                {{ message_error }}
+                            </label>
+                        </div>
                     </form>
                 </div>
-
             </div>
-            {% endfor %}
         </div>
-    </form>
-</div>
-{% if info_ == 1 %}
-<div class="info_about_event_gray">
-</div>
-<form action="" method="get">
-    <div class="cl-btn-7" name="close_button"></div>
-    <div class="close_button">
-        <input type="submit" value=" ">
     </div>
-</form>
-<div class="info_about_event">
-
-    <br>Название:
-    <p4>{{ event_info['event_name'].values[0]}}</p4>
-    <br>
-    <br>Тип:
-    <p4>{{ event_info['type_name'].values[0]}}</p4>
-    <br>
-    <br>Тема:
-    <p4>{{ event_info['theme_name'].values[0]}}</p4>
-    <br>
-    <br>Организатор:
-    <p4>{{ event_info['organizer_name'].values[0]}}</p4>
-    <br>
-    <br>Количество участников:
-    <p4>{{ event_info['participants'].values[0]}}</p4>
-    <br>
-    <br>Количество зарегистрировавшихся на мероприятие:
-    {% if len(participants_list[participants_list['event_id'] ==
-    event_info['event_id'].values[0]]['coun']) != 0%}
-
-    <p4>{{participants_list[participants_list['event_id'] ==
-        event_info['event_id'].values[0]]['coun'].values[0]}}
-    </p4>
-    {%else%}
-    0
-    {%endif%}
-    <br>
-    {% if event_info['beginning_dat'].values[0] == event_info['expiration_dat'].values[0] %}
-    <br>Дата мероприятия:
-    <p4>{{ event_info['beginning_dat'].values[0]}}</p4>
-    {% else %}
-    Дата мероприятия:
-    <p4> {{ event_info['beginning_dat'].values[0]}} - {{ event_info['expiration_dat'].values[0]}}</p4>
-    {% endif %}
-    <br>
-    <br>Время:
-    <p4>{{ event_info['start_time'].values[0]}} - {{ event_info['end_time'].values[0]}}</p4>
-    <br>
-    <br>Площадка:
-    <p4>{{ event_info['location_name'].values[0]}}</p4>
-    <br>
-    <br>Место проведения:
-    <p4>{{ event_info['venue_name'].values[0]}}</p4>
-    <br>
-    <br>Статус:
-    <p4>{{ event_info['status_name'].values[0]}}</p4>
-    <br><br><br><br>
-    <br>Описание:<br>
-    <p4>{{ event_info['description'].values[0]}}</p4>
-    <br>
-
-</div>
 {% endif %}
-
-{% if user_login == True %}
-<div class="info_about_event_gray">
-</div>
-<form action="" method="get">
-    <div class="cl-btn-8" name="close_button"></div>
-    <div class="close_button2">
-        <input type="submit" value=" ">
-    </div>
-</form>
-<div class="auth">
-    <form action="" method="get">
-        Логин: <br><input type="text" name="login" style="height:40px; margin-top:10%;">
-        <br><br><br>
-        Пароль: <br><input type="text" name="password" style="height:40px; margin-top:10%;">
-        <br>
-        {% if error_info == True%}
-        <p0 style="position:fixed;">Неправильный логин или пароль</p0>
-        {% endif %}
-        <input type="submit" value="Войти" style="width:50%; height:10%; margin-left:25%; margin-top:30%;">
-    </form>
-</div>
-{% endif %}
-
 </body>
 </html>
